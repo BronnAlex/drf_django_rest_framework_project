@@ -55,7 +55,7 @@ class LessonModel(models.Model):
         verbose_name="Урок из курса",
         help_text="Добавьте к какому курсу относится урок",
     )
-    video_link = models.CharField(
+    video_link = models.URLField(
         max_length=500,
         blank=True,
         null=True,
