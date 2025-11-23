@@ -1,0 +1,144 @@
+[
+{
+    "model": "users.payments",
+    "pk": 1,
+    "fields": {
+        "password": "",
+        "last_login": null,
+        "user": 1,
+        "paid_course_or_lesson": 8,
+        "object_id": 4,
+        "amount_payment": "10.00",
+        "date_pay": "2025-11-23T07:51:17.114Z",
+        "method_payment": "Наличные"
+    }
+},
+{
+    "model": "users.payments",
+    "pk": 2,
+    "fields": {
+        "password": "",
+        "last_login": null,
+        "user": 1,
+        "paid_course_or_lesson": 9,
+        "object_id": 7,
+        "amount_payment": "5.00",
+        "date_pay": "2025-11-23T08:03:46.528Z",
+        "method_payment": "Наличные"
+    }
+},
+{
+    "model": "users.customuser",
+    "pk": 1,
+    "fields": {
+        "password": "",
+        "last_login": null,
+        "email": "admin@example11.com",
+        "phone": null,
+        "city": null,
+        "avatar": ""
+    }
+},
+{
+    "model": "materials.coursemodel",
+    "pk": 1,
+    "fields": {
+        "name": "Английский с нуля",
+        "photo": "",
+        "description": "Освой английский за три месяца"
+    }
+},
+{
+    "model": "materials.coursemodel",
+    "pk": 2,
+    "fields": {
+        "name": "Ораторское искусство",
+        "photo": "",
+        "description": "Ступи на путь президента"
+    }
+},
+{
+    "model": "materials.coursemodel",
+    "pk": 3,
+    "fields": {
+        "name": "Тест куср",
+        "photo": "",
+        "description": "Описание тестового курса"
+    }
+},
+{
+    "model": "materials.coursemodel",
+    "pk": 4,
+    "fields": {
+        "name": "Курс программирования",
+        "photo": "",
+        "description": "Обучаем языку пайтон"
+    }
+},
+{
+    "model": "materials.lessonmodel",
+    "pk": 2,
+    "fields": {
+        "name": "Вводный урок",
+        "photo_preview": "",
+        "description": "Глаголы в английском языке. Verbs",
+        "course": 1,
+        "video_link": null
+    }
+},
+{
+    "model": "materials.lessonmodel",
+    "pk": 3,
+    "fields": {
+        "name": "Урок 2",
+        "photo_preview": "",
+        "description": "Времена настоящее и тд",
+        "course": 1,
+        "video_link": null
+    }
+},
+{
+    "model": "materials.lessonmodel",
+    "pk": 4,
+    "fields": {
+        "name": "Урок 3",
+        "photo_preview": "",
+        "description": "Эссе",
+        "course": 2,
+        "video_link": null
+    }
+},
+{
+    "model": "materials.lessonmodel",
+    "pk": 5,
+    "fields": {
+        "name": "тест урок 1",
+        "photo_preview": "",
+        "description": "описание урока 1",
+        "course": 3,
+        "video_link": null
+    }
+},
+{
+    "model": "materials.lessonmodel",
+    "pk": 6,
+    "fields": {
+        "name": "тест Урок 2",
+        "photo_preview": "",
+        "description": "Описание урока 2",
+        "course": 3,
+        "video_link": null
+    }
+},
+{
+    "model": "materials.lessonmodel",
+    "pk": 7,
+    "fields": {
+        "name": "Первый урок",
+        "photo_preview": "",
+        "description": "Ввод в программирование",
+        "course": 4,
+        "video_link": null
+    }
+}
+]
