@@ -1,14 +1,11 @@
 from rest_framework import viewsets
-from rest_framework.generics import (
-    CreateAPIView,
-    DestroyAPIView,
-    ListAPIView,
-    RetrieveAPIView,
-    UpdateAPIView,
-)
+from rest_framework.generics import (CreateAPIView, DestroyAPIView,
+                                     ListAPIView, RetrieveAPIView,
+                                     UpdateAPIView)
 
 from materials.models import CourseModel, LessonModel
 from materials.serializers import CourseSerializer, LessonSerializer
+from users.permissions import IsModeratorPermission, IsOwnerOrPermission
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -19,6 +16,33 @@ class CourseViewSet(viewsets.ModelViewSet):
     queryset = CourseModel.objects.all()
     serializer_class = CourseSerializer
 
+    def perform_create(self, serializer):
+        # автоматическое создание владельца при создании курса
+        course = serializer.save()
+        course.owner = self.request.user
+        course.save()
+
+    def get_permissions(self):
+        """Переопределение прав доступа"""
+        # создавать могут все авторизованные пользователи и не модераторы
+        if self.action in [
+            "create",
+        ]:
+            # Пользователь должен быть не модератором
+            self.permission_classes = (~IsModeratorPermission,)
+        elif self.action in [
+            "update",
+            "retrieve",
+        ]:
+            # Обновлять и просматривать может или модератор или владелец
+            self.permission_classes = (IsModeratorPermission | IsOwnerOrPermission,)
+        elif self.action == "destroy":
+            # удалять может немодератор, но владелец
+            self.permission_classes = (
+                ~IsModeratorPermission | IsOwnerOrPermission,
+            )  # странное условие не модератор или владелец
+        return super().get_permissions()
+
 
 class LessonCreateAPIView(CreateAPIView):
     """
@@ -28,6 +52,13 @@ class LessonCreateAPIView(CreateAPIView):
 
     queryset = LessonModel.objects.all()
     serializer_class = LessonSerializer
+    permission_classes = (~IsModeratorPermission,)
+
+    def perform_create(self, serializer):
+        # автоматическое создание владельца при создании Урока
+        lesson = serializer.save()
+        lesson.owner = self.request.user
+        lesson.save()
 
 
 class LessonListAPIView(ListAPIView):
@@ -47,6 +78,7 @@ class LessonRetrieveAPIView(RetrieveAPIView):
 
     queryset = LessonModel.objects.all()
     serializer_class = LessonSerializer
+    permission_classes = (IsModeratorPermission | IsOwnerOrPermission,)
 
 
 class LessonUpdateAPIView(UpdateAPIView):
@@ -57,6 +89,7 @@ class LessonUpdateAPIView(UpdateAPIView):
 
     queryset = LessonModel.objects.all()
     serializer_class = LessonSerializer
+    permission_classes = (IsModeratorPermission | IsOwnerOrPermission,)
 
 
 class LessonDestroyAPIView(DestroyAPIView):
@@ -67,3 +100,4 @@ class LessonDestroyAPIView(DestroyAPIView):
 
     queryset = LessonModel.objects.all()
     serializer_class = LessonSerializer
+    permission_classes = (~IsModeratorPermission | IsOwnerOrPermission,)
