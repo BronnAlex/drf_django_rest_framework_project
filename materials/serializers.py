@@ -12,32 +12,38 @@ from materials.models import CourseModel, LessonModel
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = LessonModel
-        fields = ("name", "description")
+        fields = ("name", "description", "course")
 
 
 class CourseSerializer(serializers.ModelSerializer):
     """Сериализатор для модели курсов"""
 
     count_lesson_in_course = SerializerMethodField()
-    lessons = LessonSerializer(many=True)
+    lessons = LessonSerializer(many=True, required=False)
 
     def get_count_lesson_in_course(self, course):
         """Функция нового поля и подсчета количества уроков в конкретном курсе
         по полю course(fk) в уроках и id самих курсов и поля lessons"""
         return LessonModel.objects.filter(course=course.pk).count()
 
+    # def get_lessons(self, course):
+    #     # Здесь ты можешь определить, как будут выбираться уроки для курса
+    #     lessons = LessonModel.objects.filter(course=course.pk)
+    #     return LessonSerializer(lessons, read_only=True, many=True).data
+
     class Meta:
         model = CourseModel
-        fields = ("name", "description", "count_lesson_in_course", "lessons")
+        fields = "__all__"
 
     def create(self, validated_data):
         """Функция, создания через сериализатор в представления ViewSet"""
         lessons_data = validated_data.pop(
-            "lessons"
+            "lessons", None
         )  # Удаление поля методом создания при Post запросе
         course = CourseModel.objects.create(
             **validated_data
         )  # Создание курсов и распаковка
-        for lesson_data in lessons_data:
-            LessonModel.objects.create(course=course, **lesson_data)
+        if lessons_data:
+            for lesson_data in lessons_data:
+                LessonModel.objects.create(course=course, **lesson_data)
         return course

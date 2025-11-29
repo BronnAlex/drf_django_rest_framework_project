@@ -1,144 +1,114 @@
 [
 {
-    "model": "users.payments",
+    "model": "users.customuser",
     "pk": 1,
     "fields": {
-        "password": "",
-        "last_login": null,
-        "user": 1,
-        "paid_course_or_lesson": 8,
-        "object_id": 4,
-        "amount_payment": "10.00",
-        "date_pay": "2025-11-23T07:51:17.114Z",
-        "method_payment": "Наличные"
-    }
-},
-{
-    "model": "users.payments",
-    "pk": 2,
-    "fields": {
-        "password": "",
-        "last_login": null,
-        "user": 1,
-        "paid_course_or_lesson": 9,
-        "object_id": 7,
-        "amount_payment": "5.00",
-        "date_pay": "2025-11-23T08:03:46.528Z",
-        "method_payment": "Наличные"
+        "password": "pbkdf2_sha256$1000000$BY5zQviGZ61IWez5vXzhci$0Tiy8b+nckt1bfdF9XdjS4+GeWR4mgW+jPsmA/O2lJk=",
+        "last_login": "2025-11-29T14:23:28.895Z",
+        "is_superuser": true,
+        "email": "Petka@mail.ru",
+        "phone": null,
+        "city": null,
+        "avatar": "",
+        "is_active": true,
+        "is_staff": true,
+        "groups": [],
+        "user_permissions": []
     }
 },
 {
     "model": "users.customuser",
-    "pk": 1,
+    "pk": 2,
     "fields": {
-        "password": "",
+        "password": "pbkdf2_sha256$1000000$zewQQ0LeGNg5qYuWq6V2WH$POvQ4lv0TY6oQIVw1oCWhVzEF4Rih0J1c7gmHqB4g7w=",
         "last_login": null,
-        "email": "admin@example11.com",
+        "is_superuser": false,
+        "email": "two_postman@bk.ru",
         "phone": null,
         "city": null,
-        "avatar": ""
+        "avatar": "",
+        "is_active": true,
+        "is_staff": false,
+        "groups": [
+            1
+        ],
+        "user_permissions": []
+    }
+},
+{
+    "model": "users.customuser",
+    "pk": 3,
+    "fields": {
+        "password": "pbkdf2_sha256$1000000$ZAHCj73lzzleT3zD5V8nDe$4n/NSYBXH12JRCpzVqL6stYRSlWE/LvFvdN/fHi4T8k=",
+        "last_login": null,
+        "is_superuser": false,
+        "email": "new_user@bk.ru",
+        "phone": null,
+        "city": null,
+        "avatar": "",
+        "is_active": true,
+        "is_staff": false,
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "users.customuser",
+    "pk": 4,
+    "fields": {
+        "password": "pbkdf2_sha256$1000000$i5d934JUxGh3EbTeMzWDmI$k0W+5bYtwsOnEJ0gwyepxwRIVm5c92G3Xf1UNIJzozc=",
+        "last_login": null,
+        "is_superuser": false,
+        "email": "deleter@bk.ru",
+        "phone": null,
+        "city": null,
+        "avatar": "",
+        "is_active": true,
+        "is_staff": false,
+        "groups": [],
+        "user_permissions": []
     }
 },
 {
     "model": "materials.coursemodel",
     "pk": 1,
     "fields": {
-        "name": "Английский с нуля",
+        "name": "Курс с правами доступа",
         "photo": "",
-        "description": "Освой английский за три месяца"
+        "description": "Проверяем авторизацию",
+        "owner": 3
     }
 },
 {
     "model": "materials.coursemodel",
     "pk": 2,
     "fields": {
-        "name": "Ораторское искусство",
+        "name": "Очередной курс",
         "photo": "",
-        "description": "Ступи на путь президента"
+        "description": "Проверяем снова работу от одного пользователя",
+        "owner": 3
     }
 },
 {
     "model": "materials.coursemodel",
-    "pk": 3,
-    "fields": {
-        "name": "Тест куср",
-        "photo": "",
-        "description": "Описание тестового курса"
-    }
-},
-{
-    "model": "materials.coursemodel",
-    "pk": 4,
-    "fields": {
-        "name": "Курс программирования",
-        "photo": "",
-        "description": "Обучаем языку пайтон"
-    }
-},
-{
-    "model": "materials.lessonmodel",
-    "pk": 2,
-    "fields": {
-        "name": "Вводный урок",
-        "photo_preview": "",
-        "description": "Глаголы в английском языке. Verbs",
-        "course": 1,
-        "video_link": null
-    }
-},
-{
-    "model": "materials.lessonmodel",
-    "pk": 3,
-    "fields": {
-        "name": "Урок 2",
-        "photo_preview": "",
-        "description": "Времена настоящее и тд",
-        "course": 1,
-        "video_link": null
-    }
-},
-{
-    "model": "materials.lessonmodel",
-    "pk": 4,
-    "fields": {
-        "name": "Урок 3",
-        "photo_preview": "",
-        "description": "Эссе",
-        "course": 2,
-        "video_link": null
-    }
-},
-{
-    "model": "materials.lessonmodel",
     "pk": 5,
     "fields": {
-        "name": "тест урок 1",
-        "photo_preview": "",
-        "description": "описание урока 1",
-        "course": 3,
-        "video_link": null
+        "name": "Новый курс",
+        "photo": "",
+        "description": "от deleter@bk.ru",
+        "owner": 4
     }
 },
 {
     "model": "materials.lessonmodel",
     "pk": 6,
     "fields": {
-        "name": "тест Урок 2",
+        "name": "Урок 1",
         "photo_preview": "",
-        "description": "Описание урока 2",
-        "course": 3,
-        "video_link": null
-    }
-},
-{
-    "model": "materials.lessonmodel",
-    "pk": 7,
-    "fields": {
-        "name": "Первый урок",
-        "photo_preview": "",
-        "description": "Ввод в программирование",
-        "course": 4,
-        "video_link": null
+        "description": "Проверочный урок от deleter@bk.ru",
+        "course": 5,
+        "video_link": null,
+        "owner": 4
     }
 }
 ]
