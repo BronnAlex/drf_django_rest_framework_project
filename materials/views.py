@@ -1,9 +1,15 @@
 from rest_framework import viewsets
-from rest_framework.generics import (CreateAPIView, DestroyAPIView,
-                                     ListAPIView, RetrieveAPIView,
-                                     UpdateAPIView)
+from rest_framework.generics import (
+    CreateAPIView,
+    DestroyAPIView,
+    ListAPIView,
+    RetrieveAPIView,
+    UpdateAPIView,
+)
 
+# from rest_framework.permissions import AllowAny
 from materials.models import CourseModel, LessonModel
+from materials.paginations import CustomSetPagination
 from materials.serializers import CourseSerializer, LessonSerializer
 from users.permissions import IsModeratorPermission, IsOwnerOrPermission
 
@@ -15,6 +21,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     queryset = CourseModel.objects.all()
     serializer_class = CourseSerializer
+    pagination_class = CustomSetPagination
 
     def perform_create(self, serializer):
         # автоматическое создание владельца при создании курса
@@ -68,6 +75,7 @@ class LessonListAPIView(ListAPIView):
 
     queryset = LessonModel.objects.all()
     serializer_class = LessonSerializer
+    pagination_class = CustomSetPagination
 
 
 class LessonRetrieveAPIView(RetrieveAPIView):
