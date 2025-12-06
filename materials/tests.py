@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from materials.models import LessonModel, CourseModel
+from materials.models import LessonModel, CourseModel, Subscription
 from users.models import CustomUser
 
 
@@ -272,3 +272,51 @@ class LessonTestCase(APITestCase):
 
         # тестирование списка курсов с уроками и пагинацией
         self.assertEqual(data_result, data_response)
+
+
+
+
+class SubscriptionTestCase(APITestCase):
+    """Класс для тестирования представления курсов"""
+
+    def setUp(self):
+        """В setUp мы прописывам некие фикстуры можно сказать
+        создать какие-то значения. Это для того, что перед каждым выполнением теста
+        будет очищаться база и запускаться setUp, который будет создавть то что нам надо
+        """
+
+        self.user = CustomUser.objects.create(email="subscription.pro")
+        self.course = CourseModel.objects.create(
+            name="Курс, проверка подписки", description="Описание первого курса", owner=self.user
+        )
+        # self.lessons = LessonModel.objects.create(
+        #     name="Урок 1", description="Описание урока 1", course=self.course
+        # )
+        #
+        # self.subscription = Subscription.objects.all()
+
+        self.client.force_authenticate(user=self.user)  # для того чтобы авторизовать пользователя
+
+
+    def test_subscription(self):
+        """Тест проверки пидписки по id курса, либо удалена подписка, либо добавлена """
+
+        # Общие тесты работают, но почему то все смещается, свободный запуск при отдельном тестировании
+        data = {"course_id": 1}
+        url = reverse("materials:toggle_subscribe")
+        response = self.client.post(url, data)  # выбираем post запрос, так как это проверка на подписку
+
+        responce_json = response.json()
+        # тестирование статуса создания(201)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # тестирование присваивается ли id курса
+        self.assertEqual(
+            data.get("course_id"),
+            self.course.pk,)
+
+        # тестирование присваивается ли id курса
+        self.assertEqual(
+            responce_json.get('message'),
+            f'Подписка на курс "{self.course.name}" добавлена.', )
+

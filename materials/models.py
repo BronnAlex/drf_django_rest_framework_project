@@ -91,3 +91,26 @@ class LessonModel(models.Model):
         verbose_name = "Урок"
         verbose_name_plural = "Уроки"
         ordering = ["name"]
+
+# Модель подписки, связывающая пользователя и курс
+class Subscription(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='subscriptions' # для удобного доступа с user.subscriptions.all()
+    )
+    course = models.ForeignKey(
+        CourseModel,
+        on_delete=models.CASCADE,
+        related_name='subscribers' #  для удобного доступа с course.subscribers.all()
+    )
+    date_subscribed = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # Гарантирует, что пользователь может подписаться на один курс только один раз
+        unique_together = ('user', 'course')
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+
+    def __str__(self):
+        return f"{self.user.username} на {self.course.title}"
