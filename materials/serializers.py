@@ -2,6 +2,8 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
 from materials.models import CourseModel, LessonModel
+from materials.validators import validate_name_forbidden, VideoLinkValidator
+
 
 # Для сериализатора для модели курса реализуйте поле вывода уроков.
 # Вывод реализуйте с помощью сериализатора для связанной модели.
@@ -10,16 +12,25 @@ from materials.models import CourseModel, LessonModel
 
 
 class LessonSerializer(serializers.ModelSerializer):
+    # video_link = serializers.CharField()
+
     class Meta:
         model = LessonModel
-        fields = ("name", "description", "course")
+        fields = ("name", "description", "course", "video_link")
+        extra_kwargs = {
+            "course": {"required": False}
+        }  # Сделать поле необязательным для заполнения вообще это лучше убрать, и знать какой id курса
+        validators = [VideoLinkValidator(field="video_link")]
 
 
 class CourseSerializer(serializers.ModelSerializer):
     """Сериализатор для модели курсов"""
 
     count_lesson_in_course = SerializerMethodField()
-    lessons = LessonSerializer(many=True, required=False)
+    lessons = LessonSerializer(
+        many=True, read_only=True, required=False
+    )  # вложенный сериализатор не редактируется
+    name = serializers.CharField(validators=[validate_name_forbidden])
 
     def get_count_lesson_in_course(self, course):
         """Функция нового поля и подсчета количества уроков в конкретном курсе
