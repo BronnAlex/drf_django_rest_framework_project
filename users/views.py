@@ -9,9 +9,10 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import AllowAny
 
-from users.models import CustomUser, Payments
+from users.models import CustomUser, Payments, PaymentLinkModel
 from users.permissions import IsOwnerOrPermission, IsModeratorPermission
-from users.serializers import PaymentSerializer, UserSerializer
+from users.serializers import PaymentSerializer, UserSerializer, PaymentLinkSerializer
+from users.services import  create_stripe_price, create_stripe_session
 
 
 class PaymentsViewSet(viewsets.ModelViewSet):
@@ -93,3 +94,26 @@ class UserDestroyAPIView(DestroyAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsModeratorPermission | IsOwnerOrPermission,)
+
+
+
+
+
+class PaymentLinkModelCreateAPIView(CreateAPIView):
+    serializer_class = PaymentLinkSerializer
+    queryset = PaymentLinkModel.objects.all()
+
+
+
+    def perform_create(self, serializer):
+        """Данная функция для того, что мы установили username=None в моделе"""
+        payment = serializer.save(
+            user=self.request.user
+        )  # создался платеж у которого есть сумма, теперь ее надо конвертировать. Надо создать стоимость и сгенерировать ссылку на оплату
+        amount_in_rub = payment.amount
+        price = create_stripe_price(amount_in_rub)
+        session_id, payment_link = create_stripe_session(price)
+        # в объект платежа в поле session_id в моделе записываем сессион id, которое получили
+        payment.session_id = session_id
+        payment.link_payment = payment_link
+        payment.save()

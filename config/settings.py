@@ -42,9 +42,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     "django_filters",
     "rest_framework",
     "rest_framework_simplejwt",
+    "drf_yasg",
+    "drf_spectacular",
+
     "users",
     "materials",
 ]
@@ -152,9 +156,20 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PERMISSION_CLASSES': [
     #         'rest_framework.permissions.IsAuthenticated',
     #     ], # Доступно всем(не залогиненым) пользователям
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=100),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Your Project API',
+    'DESCRIPTION': 'Your project description',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # OTHER SETTINGS
+}
+
+STRIP_PAY_SECRET_KEY = os.getenv("STRIP_PAY_SECRET_KEY")

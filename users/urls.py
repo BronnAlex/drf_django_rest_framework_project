@@ -10,6 +10,7 @@ from users.views import (
     UserListAPIView,
     UserRetrieveAPIView,
     UserUpdateAPIView,
+    PaymentLinkModelCreateAPIView,
 )
 
 app_name = "users"
@@ -34,6 +35,7 @@ urlpatterns = [
         TokenRefreshView.as_view(permission_classes=(AllowAny,)),
         name="token_refresh",
     ),
+    path("payments_link/", PaymentLinkModelCreateAPIView.as_view(), name='payments')
 ]
 
 urlpatterns += router.urls
