@@ -1,4 +1,7 @@
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiExample
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status
 from rest_framework.generics import (
     CreateAPIView,
@@ -13,10 +16,13 @@ from rest_framework.views import APIView
 # from rest_framework.permissions import AllowAny
 from materials.models import CourseModel, LessonModel, Subscription
 from materials.paginations import CustomSetPagination
-from materials.serializers import CourseSerializer, LessonSerializer
+from materials.serializers import CourseSerializer, LessonSerializer, SubscribeToggleSerializer
 from users.permissions import IsModeratorPermission, IsOwnerOrPermission
 
 
+# @method_decorator(name='list', decorator=swagger_auto_schema(
+#     operation_description="description from swagger_auto_schema via method_decorator"
+# ))
 class CourseViewSet(viewsets.ModelViewSet):
     """
     Простой ViewSet-класс представления по реализации CRUD в postman
@@ -114,53 +120,108 @@ class LessonDestroyAPIView(DestroyAPIView):
     permission_classes = (~IsModeratorPermission & IsOwnerOrPermission,)
 
 
+
+# @extend_schema_view(
+#     post=extend_schema(
+#         summary="Подписка/Отписка от курса",
+#         description="Добавляет или удаляет подписку текущего пользователя на указанный курс.",
+#         # Явно указываем разрешения для документации.
+#         # drf-spectacular ожидает список классов разрешений здесь.
+#         # Если IsModeratorPermission | IsOwnerOrPermission не работают напрямую,
+#         # вы можете описать их по отдельности или как одно логическое ИЛИ.
+#         # Вариант 1: Раздельное описание (для документации)
+#         # Если проблема только с DRF Spectaculular
+#         # security=[
+#         #     {'IsModeratorPermission': []},
+#         #     {'IsOwnerOrPermission': []},
+#         # ],
+#         # Вариант 2: Использование DRF-Spectacular для логических ИЛИ
+#         # Это может помочь, если прямая передача OperandHolder вызывает проблему
+#         # Если IsModeratorPermission и IsOwnerOrPermission это классы разрешений
+#         # то можно сделать так:
+#         # security=[
+#         #     {'YourAuthScheme': []} # Replace YourAuthScheme with the actual name of your auth scheme defined in settings.py
+#         # ],
+#         # OR with custom description for permissions
+#         parameters=[], # Если есть query params
+#         request=SubscribeToggleSerializer, # Указываем сериализатор для входных данных
+#         responses={
+#             200: OpenApiExample(
+#                 'Отписка успешна',
+#                 value={"message": "Подписка на курс \"Название курса\" удалена."},
+#                 response_only=True,
+#                 status_codes=[200]
+#             ),
+#             201: OpenApiExample(
+#                 'Подписка успешна',
+#                 value={"message": "Подписка на курс \"Название курса\" добавлена."},
+# response_only=True,
+#                 status_codes=[201]
+#             ),
+#             400: OpenApiExample(
+#                 'Ошибка валидации',
+#                 value={"error": "Параметр 'course_id' обязателен."},
+#                 response_only=True,
+#                 status_codes=[400]
+#             ),
+#             404: OpenApiExample(
+#                 'Курс не найден',
+#                 value={"detail": "Не найдено."}, # Стандартный ответ DRF для 404
+#                 response_only=True,
+#                 status_codes=[404]
+#             ),
+#             403: OpenApiExample(
+#                 'Нет прав',
+#                 value={"detail": "У вас нет разрешения на выполнение этого действия."},
+#                 response_only=True,
+#                 status_codes=[403]
+#             ),
+#         }
+#     )
+# ) # непонятно как использовать drf_spectacular
 class SubscribeToggleView(APIView):
     # Указываем, что доступ к этому View разрешен только аутентифицированным пользователям
     permission_classes = (IsModeratorPermission | IsOwnerOrPermission,)
 
+    # def get_permissions(self):
+    #     print(f"DEBUG: type(self.permission_classes) = {type(self.permission_classes)}")
+    #     print(f"DEBUG: self.permission_classes = {self.permission_classes}")
+    #     return super().get_permissions()
+
     def post(self, request, *args, **kwargs):
-        # 1. Получаем пользователя из self.request
-        # request.user автоматически предоставляется DRF после аутентификации
-        user = request.user
+        # 1. Инициализируем сериализатор с полученными данными
+        # Вся валидация (наличие course_id, его тип, существование курса) будет выполнена сериализатором
+        serializer = SubscribeToggleSerializer(data=request.data)
 
-        # 2. Получаем ID курса из self.request.data (POST-данные)
-        # Используем .get() для безопасного доступа, чтобы избежать KeyError
-        course_id = request.data.get('course_id')
+        # 2. Выполняем валидацию. Если данные некорректны, is_valid() вызовет исключение
+        # ValidationError и DRF автоматически вернет HTTP 400 Bad Request с деталями ошибок.
+        serializer.is_valid(raise_exception=True)
 
-        # Проверяем, был ли передан course_id
-        if not course_id:
-            return Response(
-                {"error": "Параметр 'course_id' обязателен."},
-                status=status.HTTP_400_BAD_REQUEST # 400 Bad Request
-            )
-
-        # 3. Получаем объект курса из базы с помощью get_object_or_404
-        # Если курс с таким ID не найден, будет автоматически возвращен HTTP 404
-        course_item = get_object_or_404(CourseModel, id=course_id)
+        # 3. Получаем валидированные данные.
+        # Поскольку в сериализаторе мы вернули объект CourseModel из validate_course_id,
+        # здесь мы сразу получаем объект курса, а не только его ID.
+        course_item = serializer.validated_data['course_id']
+        user = request.user  # Пользователь из self.request
 
         # 4. Получаем объекты подписок по текущему пользователю и курсу
-        # Используем .filter(), так как .get() вызовет исключение, если объекта нет
-        # или если их несколько (хотя unique_together предотвращает последнее)
         subs_query = Subscription.objects.filter(user=user, course=course_item)
 
         message = ''
-        http_status = status.HTTP_200_OK # По умолчанию OK
+        http_status = status.HTTP_200_OK  # По умолчанию OK
 
         # 5. Если подписка у пользователя на этот курс есть - удаляем ее
         if subs_query.exists():
-            # Удаляем все найденные подписки (в идеале, будет только одна)
             subs_query.delete()
             message = f'Подписка на курс "{course_item.name}" удалена.'
         # 6. Если подписки у пользователя на этот курс нет - создаем ее
         else:
             try:
-                # Создаем новую подписку
                 Subscription.objects.create(user=user, course=course_item)
                 message = f'Подписка на курс "{course_item.name}" добавлена.'
-                http_status = status.HTTP_201_CREATED # 201 Created, так как объект создан
+                http_status = status.HTTP_201_CREATED  # 201 Created, так как объект создан
             except Exception as e:
-                # Обработка возможной ошибки при создании (например, если unique_together не сработал бы,
-                # но в нашем случае он должен предотвращать дубликаты)
+                # В случае уникальных ограничений (unique_together) DRF обычно обрабатывает это лучше,
+                # но такой try-except блок остается хорошей практикой для других неожиданных ошибок.
                 return Response(
                     {"error": f"Ошибка при добавлении подписки: {str(e)}"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
