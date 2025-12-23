@@ -1,8 +1,10 @@
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiExample
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.generics import (
     CreateAPIView,
     DestroyAPIView,
@@ -17,6 +19,7 @@ from rest_framework.views import APIView
 from materials.models import CourseModel, LessonModel, Subscription
 from materials.paginations import CustomSetPagination
 from materials.serializers import CourseSerializer, LessonSerializer, SubscribeToggleSerializer
+from materials.tasks import send_email_task_celery
 from users.permissions import IsModeratorPermission, IsOwnerOrPermission
 
 
@@ -58,6 +61,12 @@ class CourseViewSet(viewsets.ModelViewSet):
                 ~IsModeratorPermission & IsOwnerOrPermission,
             )  # уже условие получше, не модератор и владелец
         return super().get_permissions()
+
+    # @action(detail=True, methods='update')
+    # def update_course(self, pk):
+    #     course = CourseModel.objects.filter(pk=pk)
+
+
 
 
 class LessonCreateAPIView(CreateAPIView):
@@ -180,13 +189,9 @@ class LessonDestroyAPIView(DestroyAPIView):
 #     )
 # ) # непонятно как использовать drf_spectacular
 class SubscribeToggleView(APIView):
+    """Класс представления подписания на курса или отмены подписки"""
     # Указываем, что доступ к этому View разрешен только аутентифицированным пользователям
     permission_classes = (IsModeratorPermission | IsOwnerOrPermission,)
-
-    # def get_permissions(self):
-    #     print(f"DEBUG: type(self.permission_classes) = {type(self.permission_classes)}")
-    #     print(f"DEBUG: self.permission_classes = {self.permission_classes}")
-    #     return super().get_permissions()
 
     def post(self, request, *args, **kwargs):
         # 1. Инициализируем сериализатор с полученными данными
@@ -212,11 +217,16 @@ class SubscribeToggleView(APIView):
         # 5. Если подписка у пользователя на этот курс есть - удаляем ее
         if subs_query.exists():
             subs_query.delete()
+            # send_email_task_celery.delay(email='lesha.bronnikov.99@mail.ru') # Не отправляем сообщение тому кто подписался(когда он отписался)
+
             message = f'Подписка на курс "{course_item.name}" удалена.'
+
         # 6. Если подписки у пользователя на этот курс нет - создаем ее
         else:
             try:
                 Subscription.objects.create(user=user, course=course_item)
+                send_email_task_celery.delay(user.email) # 'lesha.bronnikov.99@mail.ru' (для тестов)
+
                 message = f'Подписка на курс "{course_item.name}" добавлена.'
                 http_status = status.HTTP_201_CREATED  # 201 Created, так как объект создан
             except Exception as e:

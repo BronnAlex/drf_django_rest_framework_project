@@ -1,8 +1,11 @@
+
+
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
@@ -76,6 +79,7 @@ class CustomUser(
         help_text="Укажите статус активности",
     )
     is_staff = models.BooleanField(default=False)  # Добавляем is_staff для админ-панели
+    last_login = models.DateField(auto_now=True, verbose_name="Дата последнего входа", blank=True, null=True)
 
     objects = CustomUserManager()  # <--- НАЗНАЧАЕМ НАШ КАСТОМНЫЙ МЕНЕДЖЕР
 

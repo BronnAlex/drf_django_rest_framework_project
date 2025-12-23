@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
 from rest_framework.generics import (
@@ -13,6 +14,7 @@ from users.models import CustomUser, Payments, PaymentLinkModel
 from users.permissions import IsOwnerOrPermission, IsModeratorPermission
 from users.serializers import PaymentSerializer, UserSerializer, PaymentLinkSerializer
 from users.services import  create_stripe_price, create_stripe_session
+from users.tasks import deactivate_user_in_last_login
 
 
 class PaymentsViewSet(viewsets.ModelViewSet):
@@ -39,7 +41,7 @@ class UserCreateAPIView(CreateAPIView):
     permission_classes = (
         AllowAny,
     )  # это разрешение всем (даже анонимным) пользователям на регистрацию, также в маршрутах пропишем отдельно для логина
-
+    deactivate_user_in_last_login()
     def perform_create(self, serializer):
         """Данная функция для того, что мы установили username=None в моделе"""
         user = serializer.save(
@@ -48,6 +50,7 @@ class UserCreateAPIView(CreateAPIView):
         user.set_password(
             user.password
         )  # для того, чтобы захешировался пароль пользователя
+        user.last_login = timezone.now().date()
         user.save()
 
 
