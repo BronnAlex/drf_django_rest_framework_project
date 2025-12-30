@@ -191,7 +191,7 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 
-
+# расписание выполнения задач автоматически без вызова функций
 CELERY_BEAT_SCHEDULE = {
     "send_email_birth_day": {
         "task": "materials.tasks.send_email_birth_day",
@@ -201,6 +201,13 @@ CELERY_BEAT_SCHEDULE = {
         "task": "materials.tasks.send_email_for_update_course",
         "schedule": timedelta(seconds=60),  # фоновая задача запускается каждый день
           "args": (1,) # обязательный аргумент, так как вызывается задача с аргументом
+    },
+
+    # Проверка неактивных пользователей каждый день в 3:00 ночи
+    'deactivate_inactive_users': {
+        'task': 'users.tasks.deactivate_inactive_users', # важно указать приложение users
+        'schedule': timedelta(seconds=10),  # Каждый день в 3:00
+        'args': (), # агументов никаких нет
     },
 
 }
