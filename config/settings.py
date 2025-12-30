@@ -195,9 +195,16 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_BEAT_SCHEDULE = {
     "send_email_birth_day": {
         "task": "materials.tasks.send_email_birth_day",
-        "schedule": timedelta(seconds=5),  # фоновая задача запускается каждый день
+        "schedule": timedelta(seconds=60),  # фоновая задача запускается каждый день
     },
+    "send_email_for_update_course": {
+        "task": "materials.tasks.send_email_for_update_course",
+        "schedule": timedelta(seconds=60),  # фоновая задача запускается каждый день
+          "args": (1,) # обязательный аргумент, так как вызывается задача с аргументом
+    },
+
 }
+
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.yandex.ru"
