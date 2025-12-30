@@ -11,10 +11,10 @@ from rest_framework.generics import (
 from rest_framework.permissions import AllowAny
 
 from users.models import CustomUser, Payments, PaymentLinkModel
-from users.permissions import IsOwnerOrPermission, IsModeratorPermission
+from users.permissions import IsOwnerOrPermission, IsModeratorPermission, UpdateLastLoginPermission
 from users.serializers import PaymentSerializer, UserSerializer, PaymentLinkSerializer
 from users.services import  create_stripe_price, create_stripe_session
-from users.tasks import deactivate_user_in_last_login
+
 
 
 class PaymentsViewSet(viewsets.ModelViewSet):
@@ -41,7 +41,7 @@ class UserCreateAPIView(CreateAPIView):
     permission_classes = (
         AllowAny,
     )  # это разрешение всем (даже анонимным) пользователям на регистрацию, также в маршрутах пропишем отдельно для логина
-    deactivate_user_in_last_login()
+
     def perform_create(self, serializer):
         """Данная функция для того, что мы установили username=None в моделе"""
         user = serializer.save(
@@ -61,6 +61,7 @@ class UserListAPIView(ListAPIView):
 
     # Только для авторизованных пользователей(эти права прописаны в config.settings)
     queryset = CustomUser.objects.all()
+
     serializer_class = UserSerializer
 
 
@@ -84,7 +85,7 @@ class UserUpdateAPIView(UpdateAPIView):
     # Только для авторизованных пользователей
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = IsOwnerOrPermission
+    permission_classes = (IsOwnerOrPermission & UpdateLastLoginPermission, )
 
 
 class UserDestroyAPIView(DestroyAPIView):
@@ -96,7 +97,7 @@ class UserDestroyAPIView(DestroyAPIView):
     # Только для авторизованных пользователей
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsModeratorPermission | IsOwnerOrPermission,)
+    permission_classes = (IsModeratorPermission | IsOwnerOrPermission & UpdateLastLoginPermission)
 
 
 

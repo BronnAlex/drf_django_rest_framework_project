@@ -19,7 +19,7 @@ from rest_framework.views import APIView
 from materials.models import CourseModel, LessonModel, Subscription
 from materials.paginations import CustomSetPagination
 from materials.serializers import CourseSerializer, LessonSerializer, SubscribeToggleSerializer
-from materials.tasks import send_email_task_celery
+from materials.tasks import send_email_for_update_course
 from users.permissions import IsModeratorPermission, IsOwnerOrPermission
 
 
@@ -62,9 +62,11 @@ class CourseViewSet(viewsets.ModelViewSet):
             )  # уже условие получше, не модератор и владелец
         return super().get_permissions()
 
-    # @action(detail=True, methods='update')
-    # def update_course(self, pk):
-    #     course = CourseModel.objects.filter(pk=pk)
+    def perform_update(self, serialiser):
+        """"""
+        course = serialiser.save()
+        send_email_for_update_course.delay(course.pk)
+
 
 
 
@@ -225,7 +227,7 @@ class SubscribeToggleView(APIView):
         else:
             try:
                 Subscription.objects.create(user=user, course=course_item)
-                send_email_task_celery.delay(user.email) # 'lesha.bronnikov.99@mail.ru' (для тестов)
+                # send_email_task_celery.delay(user.email) # 'lesha.bronnikov.99@mail.ru' (для тестов)
 
                 message = f'Подписка на курс "{course_item.name}" добавлена.'
                 http_status = status.HTTP_201_CREATED  # 201 Created, так как объект создан
