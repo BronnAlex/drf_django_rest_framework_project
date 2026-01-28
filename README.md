@@ -9,6 +9,8 @@
 Удалил и создал заново БД, так как изначально не прописал в главных настройках AUTH_USER_MODEL = "users.CustomUser" 
 Добавил модель подписки на курс и удаление подписки 
 
+Создал файл Dockerfile и docker-compose.yml
+
 Добавил в проект celery и celery-beate
 Написал тесты 
 ## Установка
@@ -20,5 +22,14 @@ pip install -r requirements
 python manage.py loaddata fixtures_from_models.json
 ## Использование
 Используется в онлайн сервисах
+Чтобы использовать docker-compose выполните команды
+docker-compose up -d --build Для запуска всех сервисов, определенных в файле docker-compose.yml, используйте команду:
+docker-compose down останавливает все работающие контейнеры и удаляет контейнеры, сети, тома и образы, созданные командой docker-compose up
+docker-compose exec service_name name_command - позволяет выполнять команды внутри работающего контейнера
+Например  docker-compose exec web bash  - Пример выполнения команды bash внутри контейнера web
+
+
+ 
+
 ## Лицензия
 Проект распространяется под [лицензией MIT](LICENSE)

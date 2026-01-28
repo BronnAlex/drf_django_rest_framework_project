@@ -1,0 +1,23 @@
+SECRET_KEY=django-insecure-96-toj3)78nl9_4#g-mf9s^3_naip2&j6!nwnc6rvk2jn#uque
+DEBUG=True
+
+NAME=
+USER=
+PASSWORD=
+HOST=
+PORT=
+
+STRIP_PAY_SECRET_KEY=
+
+
+
+EMAIL_HOST_USER=
+EMAIL_HOST_PASSWORD=
+EMAIL_USE_TLS=True
+EMAIL_USE_SSL=True
+
+CELERY_BROKER_URL =
+# set the celery result backend
+CELERY_RESULT_BACKEND =
+CELERY_BEAT_SCHEDULER =
+

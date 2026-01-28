@@ -184,11 +184,11 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 
 # сайт https://www.geeksforgeeks.org/python/celery-integration-with-django/
 # set the celery broker url
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL"),
 # set the celery result backend
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND"),
 # Celery Beat settings
-CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+CELERY_BEAT_SCHEDULER = os.getenv("CELERY_BEAT_SCHEDULER"),
 
 
 # расписание выполнения задач автоматически без вызова функций
